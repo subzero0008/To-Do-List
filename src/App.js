@@ -11,9 +11,11 @@ function App() {
   const [filterBy, setFilterBy] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
+  const apiUrl = '/.netlify/functions/todos'; // Добавената линия
+
   const fetchTodos = useCallback(async () => {
     try {
-      const response = await axios.get('/todos', {
+      const response = await axios.get(apiUrl, {
         params: {
           sortBy,
           filterBy,
@@ -36,7 +38,7 @@ function App() {
     } catch (error) {
       console.error('Error fetching todos:', error);
     }
-  }, [sortBy, dateOrder, filterBy]);
+  }, [sortBy, dateOrder, filterBy, apiUrl]);
 
   useEffect(() => {
     fetchTodos();
@@ -54,7 +56,7 @@ function App() {
     setErrorMessage('');
 
     try {
-      const response = await axios.post('/todos', { text, date, priority });
+      const response = await axios.post(apiUrl, { text, date, priority });
       const newTodos = [...todos, response.data];
 
       const sortedTodos = newTodos.sort((a, b) => {
@@ -77,7 +79,7 @@ function App() {
   const completeTodo = async (id) => {
     const todo = todos.find((t) => t._id === id);
     try {
-      const updatedTodo = await axios.put(`/todos/${id}`, {
+      const updatedTodo = await axios.put(`${apiUrl}/${id}`, {
         ...todo,
         isCompleted: !todo.isCompleted,
       });
@@ -90,7 +92,7 @@ function App() {
   const removeTodo = async (id) => {
     if (window.confirm('Are you sure you want to delete this todo?')) {
       try {
-        await axios.delete(`/todos/${id}`);
+        await axios.delete(`${apiUrl}/${id}`);
         setTodos(todos.filter((t) => t._id !== id));
       } catch (error) {
         console.error('Error removing todo:', error);
@@ -101,7 +103,7 @@ function App() {
   const editTodo = async (id, newText, newDate, newPriority) => {
     const todo = todos.find((t) => t._id === id);
     try {
-      const updatedTodo = await axios.put(`/todos/${id}`, {
+      const updatedTodo = await axios.put(`${apiUrl}/${id}`, {
         ...todo,
         text: newText,
         date: newDate,
