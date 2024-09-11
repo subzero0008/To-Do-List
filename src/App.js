@@ -13,7 +13,8 @@ function App() {
 
   useEffect(() => {
     fetchTodos();
-  }, [sortBy, dateOrder, filterBy]);
+  }, [fetchTodos, sortBy, dateOrder, filterBy]);
+  
 
   const fetchTodos = async () => {
     try {
