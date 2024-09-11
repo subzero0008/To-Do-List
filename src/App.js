@@ -11,11 +11,7 @@ function App() {
   const [filterBy, setFilterBy] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  useEffect(() => {
-    fetchTodos();
-  }, [fetchTodos, sortBy, dateOrder, filterBy]);
-  
-
+  // Move fetchTodos above useEffect
   const fetchTodos = async () => {
     try {
       const response = await axios.get('/todos', {
@@ -42,6 +38,10 @@ function App() {
       console.error('Error fetching todos:', error);
     }
   };
+
+  useEffect(() => {
+    fetchTodos();
+  }, [sortBy, dateOrder, filterBy]);
 
   const addTodo = async (text, date, priority) => {
     if (!text || !date) {
