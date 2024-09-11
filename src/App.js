@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Todo from './components/Todo';
 import TodoForm from './components/TodoForm';
@@ -11,11 +11,7 @@ function App() {
   const [filterBy, setFilterBy] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  useEffect(() => {
-    fetchTodos();
-  }, [sortBy, dateOrder, filterBy]);
-
-  const fetchTodos = async () => {
+  const fetchTodos = useCallback(async () => {
     try {
       const response = await axios.get('/todos', {
         params: {
@@ -40,7 +36,11 @@ function App() {
     } catch (error) {
       console.error('Error fetching todos:', error);
     }
-  };
+  }, [sortBy, dateOrder, filterBy]);
+
+  useEffect(() => {
+    fetchTodos();
+  }, [fetchTodos]);
 
   const addTodo = async (text, date, priority) => {
     if (!text || !date) {
@@ -168,11 +168,9 @@ function App() {
           <Todo
             key={todo._id}
             todo={todo}
-            completeTodo={() => completeTodo(todo._id)}
-            removeTodo={() => removeTodo(todo._id)}
-            editTodo={(newText, newDate, newPriority) =>
-              editTodo(todo._id, newText, newDate, newPriority)
-            }
+            completeTodo={completeTodo}
+            removeTodo={removeTodo}
+            editTodo={editTodo}
           />
         ))}
         <TodoForm addTodo={addTodo} />
