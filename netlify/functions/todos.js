@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Todo = require('../../models/Todo'); // два нива нагоре от netlify/functions до root и след това models
+const Todo = require('./models/Todo'); // Пътят е спрямо местоположението на todos.js
 
 exports.handler = async function(event, context) {
   try {
