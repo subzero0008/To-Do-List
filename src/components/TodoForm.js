@@ -24,7 +24,7 @@ function TodoForm({ addTodo }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="todo-form" onSubmit={handleSubmit}>
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       <input
         type="text"
@@ -47,7 +47,7 @@ function TodoForm({ addTodo }) {
         <option value="Medium">Medium</option>
         <option value="Low">Low</option>
       </select>
-      <button type="submit">Add Task</button>
+      <button type="submit" className="save-btn">Add Task</button>
     </form>
   );
 }
