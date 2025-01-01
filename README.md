@@ -1,70 +1,75 @@
-# Getting Started with Create React App
+# LMS Learn
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+LMS Learn is a robust and scalable Learning Management System (LMS) developed as part of the E-learning course project at my university. The platform is designed using the MERN stack (MongoDB, Express.js, React.js, Node.js) to deliver a seamless experience for students and instructors.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+### Instructor Features
+- Create, update, and delete courses.
+- Upload videos, PDFs, and other course materials.
+- View enrolled students.
+- Publish and unpublish courses.
 
-### `npm start`
+### Student Features
+- Browse and preview courses.
+- Purchase courses securely using PayPal.
+- Access lectures and course materials upon purchase.
+- Track progress through enrolled courses.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Core Functionalities
+- **Payment Integration**: Secure PayPal sandbox integration for testing payments.
+- **Course Management**: Full CRUD functionality for courses.
+- **Role-based Access**: Separate access and dashboards for students and instructors.
+- **Media Uploads**: Cloudinary integration for hosting videos and images.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Technology Stack
 
-### `npm test`
+### Frontend
+- **React.js**: Component-based architecture for dynamic UI.
+- **TailwindCSS**: Utility-first CSS framework for fast and responsive styling.
+- **Axios**: Used for making API requests between the frontend and backend.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Backend
+- **Node.js**: Handles server-side logic and API development.
+- **Express.js**: Lightweight framework for building RESTful APIs.
+- **MongoDB**: NoSQL database for storing user data, courses, and payment details.
+- **Mongoose**: ODM library for seamless interaction with MongoDB.
 
-### `npm run build`
+### Additional Tools and Libraries
+- **Cloudinary**: For storing and streaming media files.
+- **PayPal REST SDK**: For secure payment processing in sandbox mode.
+- **Nodemon**: For hot-reloading during development.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Installation and Setup
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/lms-learn.git
+   Navigate to the project directory:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+cd lms-learn
+Install dependencies: npm install
+Create a .env file in the root directory and add the following:
+plaintext
+PORT=5000
+CLIENT_URL=http://localhost:5173
+MONGO_URI=your-mongodb-uri
+CLOUDINARY_CLOUD_NAME=your-cloudinary-cloud-name
+CLOUDINARY_API_KEY=your-cloudinary-api-key
+CLOUDINARY_API_SECRET=your-cloudinary-api-secret
+PAYPAL_CLIENT_ID=your-paypal-client-id
+PAYPAL_SECRET_ID=your-paypal-secret-id
+Start the backend server:
+cd/server
+npm start
+Navigate to the client directory and install dependencies
+cd client
+Start the frontend development server:
+npm start
+How It Works
+Instructor Workflow: Instructors can log in, manage their courses, upload content, and track their students.
+Student Workflow: Students can browse available courses, purchase them, and access the content.
+Payments: Payments are processed using the PayPal sandbox for testing.
 
-### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
