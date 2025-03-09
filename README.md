@@ -3,6 +3,8 @@ This is a simple To-Do List application built with React, JavaScript, and MongoD
 
 
 #LIVE DEMO https://todo-list-yuriev.netlify.app/
+
+
 Features
 Add tasks: Add new tasks with a corresponding due date.
 Mark as completed: Mark tasks as completed or not completed.
