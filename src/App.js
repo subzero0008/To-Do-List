@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Todo from './components/Todo';
 import TodoForm from './components/TodoForm';
+import AuthForm from './components/AuthForm';
 import './App.css';
 
 function App() {
@@ -10,181 +11,145 @@ function App() {
   const [dateOrder, setDateOrder] = useState('asc');
   const [filterBy, setFilterBy] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [username, setUsername] = useState(localStorage.getItem('username'));
 
   const apiUrl = '/.netlify/functions/todos';
 
+  const authHeaders = () => ({
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  const handleLogin = (newToken, newUsername) => {
+    setToken(newToken);
+    setUsername(newUsername);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    setToken(null);
+    setUsername(null);
+    setTodos([]);
+  };
+
   const fetchTodos = useCallback(async () => {
+    if (!token) return;
     try {
-      const response = await axios.get(apiUrl, {
-        params: {
-          sortBy: sortBy || 'priority',
-          filterBy,
-          dateOrder: dateOrder || 'asc'
-        }
-      });
-  
-      console.log('Fetched todos:', response.data);
-  
+      const response = await axios.get(apiUrl, authHeaders());
       if (Array.isArray(response.data)) {
-        let filteredTodos = response.data.filter(todo => todo);
-  
-        // Прилагаме филтъра според състоянието на задачите
-        if (filterBy === 'completed') {
-          filteredTodos = filteredTodos.filter(todo => todo.isCompleted);
-        } else if (filterBy === 'incomplete') {
-          filteredTodos = filteredTodos.filter(todo => !todo.isCompleted);
-        }
-  
-        const sortedTodos = filteredTodos.sort((a, b) => {
-          if (sortBy === 'priority') {
-            return a.priorityOrder - b.priorityOrder;
-          } else if (sortBy === 'date') {
+        let filtered = response.data;
+        if (filterBy === 'completed') filtered = filtered.filter(t => t.isCompleted);
+        if (filterBy === 'incomplete') filtered = filtered.filter(t => !t.isCompleted);
+        const sorted = filtered.sort((a, b) => {
+          if (sortBy === 'priority') return a.priorityOrder - b.priorityOrder;
+          if (sortBy === 'date') {
             return dateOrder === 'asc'
               ? new Date(a.date) - new Date(b.date)
               : new Date(b.date) - new Date(a.date);
           }
           return 0;
         });
-  
-        setTodos(sortedTodos);
-      } else {
-        console.error('Unexpected response format:', response.data);
+        setTodos(sorted);
       }
-    } catch (error) {
-      console.error('Error fetching todos:', error);
+    } catch (err) {
+      if (err.response?.status === 401) handleLogout();
+      console.error('Error fetching todos:', err);
     }
-  }, [sortBy, dateOrder, filterBy, apiUrl]);
-  
+  }, [token, sortBy, dateOrder, filterBy]);
+
   useEffect(() => {
     fetchTodos();
   }, [fetchTodos]);
 
   const addTodo = async (text, date, priority) => {
-    if (!text || !date) {
-      setErrorMessage('Both task name and date are required.');
-      return;
-    }
-    if (text.length < 5 || text.length > 50) {
-      setErrorMessage('Task text must be between 5 and 50 characters.');
-      return;
-    }
+    if (!text || !date) { setErrorMessage('Both task name and date are required.'); return; }
+    if (text.length < 5 || text.length > 50) { setErrorMessage('Task text must be between 5 and 50 characters.'); return; }
     setErrorMessage('');
-
     try {
-      const response = await axios.post(apiUrl, { text, date, priority });
-      const newTodos = [...todos, response.data];
-
-      const sortedTodos = newTodos.filter(todo => todo).sort((a, b) => {
-        if (sortBy === 'priority') {
-          return a.priorityOrder - b.priorityOrder;
-        } else if (sortBy === 'date') {
-          return dateOrder === 'asc'
-            ? new Date(a.date) - new Date(b.date)
-            : new Date(b.date) - new Date(a.date);
-        }
+      const response = await axios.post(apiUrl, { text, date, priority }, authHeaders());
+      const newTodos = [...todos, response.data].sort((a, b) => {
+        if (sortBy === 'priority') return a.priorityOrder - b.priorityOrder;
+        if (sortBy === 'date') return dateOrder === 'asc' ? new Date(a.date) - new Date(b.date) : new Date(b.date) - new Date(a.date);
         return 0;
       });
-
-      setTodos(sortedTodos);
-    } catch (error) {
-      console.error('Error adding todo:', error);
+      setTodos(newTodos);
+    } catch (err) {
+      console.error('Error adding todo:', err);
+      setErrorMessage('Failed to add todo.');
     }
   };
 
   const completeTodo = async (id) => {
     const todo = todos.find(t => t._id === id);
-
-    if (!todo || !todo._id) {
-      console.error('Todo not found or invalid:', id);
-      setErrorMessage('Todo not found or invalid');
-      return;
-    }
-
+    if (!todo) return;
     try {
-      const updatedTodo = await axios.put(`${apiUrl}/${id}`, {
-        ...todo,
-        isCompleted: !todo.isCompleted,
-      });
-      setTodos(todos.map(t => t._id === id ? updatedTodo.data : t));
-    } catch (error) {
-      console.error('Error completing todo:', error);
-      setErrorMessage('Failed to complete the todo');
+      const updated = await axios.put(`${apiUrl}/${id}`, { isCompleted: !todo.isCompleted }, authHeaders());
+      setTodos(todos.map(t => t._id === id ? updated.data : t));
+    } catch (err) {
+      console.error('Error completing todo:', err);
     }
   };
 
   const removeTodo = async (id) => {
-    if (window.confirm('Are you sure you want to delete this todo?')) {
-      try {
-        await axios.delete(`${apiUrl}/${id}`);
-        setTodos(todos.filter(t => t._id !== id));
-      } catch (error) {
-        console.error('Error removing todo:', error);
-        setErrorMessage('Failed to remove the todo');
-      }
+    if (!window.confirm('Are you sure you want to delete this todo?')) return;
+    try {
+      await axios.delete(`${apiUrl}/${id}`, authHeaders());
+      setTodos(todos.filter(t => t._id !== id));
+    } catch (err) {
+      console.error('Error removing todo:', err);
     }
   };
 
   const editTodo = async (id, newText, newDate, newPriority) => {
-    const todo = todos.find(t => t._id === id);
-  
-    if (!todo || !todo._id) {
-      console.error('Todo not found or invalid:', id);
-      setErrorMessage('Todo not found or invalid');
-      return;
-    }
-  
     try {
-      const updatedTodo = await axios.put(`${apiUrl}/${id}`, {
+      const updated = await axios.put(`${apiUrl}/${id}`, {
         text: newText,
         date: newDate,
         priority: newPriority,
         priorityOrder: { High: 1, Medium: 2, Low: 3 }[newPriority],
-        isCompleted: todo.isCompleted
-      });
-  
-      const updatedTodos = todos.map(t => t._id === id ? updatedTodo.data : t);
-  
-      const sortedTodos = updatedTodos.filter(todo => todo).sort((a, b) => {
-        if (sortBy === 'priority') {
-          return a.priorityOrder - b.priorityOrder;
-        } else if (sortBy === 'date') {
-          return dateOrder === 'asc'
-            ? new Date(a.date) - new Date(b.date)
-            : new Date(b.date) - new Date(a.date);
-        }
+      }, authHeaders());
+      const updatedTodos = todos.map(t => t._id === id ? updated.data : t).sort((a, b) => {
+        if (sortBy === 'priority') return a.priorityOrder - b.priorityOrder;
+        if (sortBy === 'date') return dateOrder === 'asc' ? new Date(a.date) - new Date(b.date) : new Date(b.date) - new Date(a.date);
         return 0;
       });
-  
-      setTodos(sortedTodos);
-    } catch (error) {
-      console.error('Error editing todo:', error);
-      setErrorMessage('Failed to edit the todo');
+      setTodos(updatedTodos);
+    } catch (err) {
+      console.error('Error editing todo:', err);
     }
   };
 
+  if (!token) {
+    return <AuthForm onLogin={handleLogin} />;
+  }
+
   return (
     <div className="app">
-      <h1>My To-Do List</h1>
+      <div className="app-header">
+        <h1>My To-Do List</h1>
+        <div className="user-info">
+          <span className="username">👤 {username}</span>
+          <button className="logout-btn" onClick={handleLogout}>Logout</button>
+        </div>
+      </div>
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       <div className="filters">
-        <label>
-          Sort by:
+        <label>Sort by:
           <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
             <option value="priority">Priority</option>
             <option value="date">Date</option>
           </select>
         </label>
         {sortBy === 'date' && (
-          <label>
-            Date order:
+          <label>Date order:
             <select value={dateOrder} onChange={(e) => setDateOrder(e.target.value)}>
               <option value="asc">Ascending</option>
               <option value="desc">Descending</option>
             </select>
           </label>
         )}
-        <label>
-          Filter by:
+        <label>Filter by:
           <select value={filterBy} onChange={(e) => setFilterBy(e.target.value)}>
             <option value="">All</option>
             <option value="completed">Completed</option>
@@ -193,21 +158,13 @@ function App() {
         </label>
       </div>
       <div className="todo-list">
-        {todos.map(todo => (
-          todo ? (
-            <Todo
-              key={todo._id}
-              todo={todo}
-              completeTodo={completeTodo}
-              removeTodo={removeTodo}
-              editTodo={editTodo}
-            />
-          ) : null
-        ))}
+        {todos.map(todo => todo ? (
+          <Todo key={todo._id} todo={todo} completeTodo={completeTodo} removeTodo={removeTodo} editTodo={editTodo} />
+        ) : null)}
         <TodoForm addTodo={addTodo} />
       </div>
       <div className="footer">
-        <p>&copy; 2024 Yulian Yuriev. All rights are reserved.</p>
+        <p>&copy; 2024 Yulian Yuriev. All rights reserved.</p>
       </div>
     </div>
   );

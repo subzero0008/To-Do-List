@@ -7,10 +7,6 @@ function Todo({ todo, completeTodo, removeTodo, editTodo }) {
   const [newPriority, setNewPriority] = useState(todo.priority);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
   const handleSave = () => {
     if (!newText || !newDate) {
       setErrorMessage('Both task name and date are required.');
@@ -34,10 +30,7 @@ function Todo({ todo, completeTodo, removeTodo, editTodo }) {
   };
 
   return (
-    <div
-      className="todo"
-      style={{ textDecoration: todo.isCompleted ? 'line-through' : '' }}
-    >
+    <div className={`todo ${todo.isCompleted ? 'completed' : ''}`}>
       <div className="todo-content">
         {isEditing ? (
           <>
@@ -47,18 +40,13 @@ function Todo({ todo, completeTodo, removeTodo, editTodo }) {
               className="edit-input"
               value={newText}
               onChange={(e) => setNewText(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') handleSave();
-              }}
+              onKeyPress={(e) => { if (e.key === 'Enter') handleSave(); }}
             />
             <input
               type="date"
               className="edit-input"
               value={newDate}
               onChange={(e) => setNewDate(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') handleSave();
-              }}
             />
             <select
               className="edit-input"
@@ -74,7 +62,7 @@ function Todo({ todo, completeTodo, removeTodo, editTodo }) {
           </>
         ) : (
           <>
-            <strong>{todo.text}</strong>
+            <strong className="todo-text">{todo.text}</strong>
             <div className="todo-date">Due: {todo.date}</div>
             <div className={`todo-priority ${todo.priority}`}>
               Priority: {todo.priority}
@@ -82,25 +70,12 @@ function Todo({ todo, completeTodo, removeTodo, editTodo }) {
           </>
         )}
       </div>
-      <div>
-        <button
-          className="complete-btn"
-          onClick={() => completeTodo(todo._id)}
-        >
+      <div className="todo-actions">
+        <button className="complete-btn" onClick={() => completeTodo(todo._id)}>
           {todo.isCompleted ? 'Undo' : 'Complete'}
         </button>
-        <button
-          className="remove-btn"
-          onClick={() => removeTodo(todo._id)}
-        >
-          Remove
-        </button>
-        <button
-          className="edit-btn"
-          onClick={handleEdit}
-        >
-          Edit
-        </button>
+        <button className="edit-btn" onClick={() => setIsEditing(true)}>Edit</button>
+        <button className="remove-btn" onClick={() => removeTodo(todo._id)}>Remove</button>
       </div>
     </div>
   );
