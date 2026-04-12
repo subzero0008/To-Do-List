@@ -1,184 +1,310 @@
-/* src/App.css */
+/* ===== src/App.css — Modern Dark Glass Redesign ===== */
 
-/* Основни стилове за цялото приложение */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
 body {
-  background: linear-gradient(135deg, #71b7e6, #9b59b6);
-  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   min-height: 100vh;
   margin: 0;
+  padding: 40px 16px 80px;
 }
 
 .app {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 20px;
+  padding: 28px 24px 20px;
   width: 100%;
   max-width: 500px;
+  color: #f0f0f5;
 }
 
-/* Стилове за заглавието */
 h1 {
-  text-align: center;
-  color: #333;
-  font-size: 24px;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
   margin-bottom: 20px;
+  background: linear-gradient(90deg, #a78bfa, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
 }
 
-/* Стилове за задачите */
-.todo-list {
-  list-style-type: none;
-  padding: 0;
-}
-
-.todo {
-  background: #f9f9f9;
-  border: 1px solid #000000;
-  border-radius: 5px;
-  margin-bottom: 10px;
-  padding: 10px;
+/* ── Filters ── */
+.filters {
   display: flex;
-  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
   align-items: center;
 }
 
-/* Стилове за съдържанието на задачата */
+.filters label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filters select {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 12px;
+  font-family: inherit;
+  padding: 5px 10px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.filters select:focus {
+  border-color: #a78bfa;
+}
+
+/* ── Todo list ── */
+.todo-list {
+  list-style: none;
+  padding: 0;
+}
+
+/* ── Individual todo ── */
+.todo {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.todo:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.todo.completed {
+  opacity: 0.45;
+}
+
+.todo.completed .todo-text {
+  text-decoration: line-through;
+}
+
+/* ── Todo content ── */
 .todo-content {
   flex: 1;
+  min-width: 0;
 }
 
-/* Стилове за текстовото поле при редактиране */
-.edit-input {
-  margin: 5px 0;
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-  width: 100%;
-}
-
-/* Стилове за датата на задачата */
-.todo-date {
-  color: #777;
-  margin-top: 5px;
-}
-
-/* Стилове за приоритета на задачата */
-.todo-priority {
-  padding: 5px;
-  border-radius: 5px;
-  font-weight: bold;
-  margin-top: 5px;
-  display: inline-block;
-  color: #ffffff; /* Текстът да бъде бял */
+.todo-text {
   font-size: 14px;
+  font-weight: 500;
+  color: #f0f0f5;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.todo-date {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.38);
+  margin-top: 3px;
+}
+
+/* ── Priority badge ── */
+.todo-priority {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  letter-spacing: 0.4px;
+  display: inline-block;
+  margin-top: 5px;
+  text-transform: uppercase;
 }
 
 .todo-priority.High {
-  background-color: #c0392b; /* Червен фон */
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .todo-priority.Medium {
-  background-color: #f39c12; /* Оранжев фон */
+  background: rgba(245, 158, 11, 0.18);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .todo-priority.Low {
-  background-color: #3498db; /* Син фон */
+  background: rgba(96, 165, 250, 0.18);
+  color: #93c5fd;
+  border: 1px solid rgba(96, 165, 250, 0.3);
 }
 
-/* Стилове за бутоните */
-.save-btn {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin: 5px;
+/* ── Edit inputs ── */
+.edit-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  color: #f0f0f5;
+  font-size: 13px;
+  font-family: inherit;
+  padding: 8px 12px;
+  margin: 4px 0;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
+.edit-input:focus {
+  border-color: #a78bfa;
+}
+
+/* ── Buttons ── */
+button {
+  font-family: inherit;
+}
+
+.complete-btn,
+.edit-btn,
+.remove-btn,
+.save-btn,
 .cancel-btn {
-  background-color: #f44336;
-  color: white;
   border: none;
-  padding: 10px;
-  border-radius: 5px;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
-  margin: 5px;
+  transition: opacity 0.15s, transform 0.1s;
+  margin: 3px;
+}
+
+.complete-btn:active,
+.edit-btn:active,
+.remove-btn:active,
+.save-btn:active,
+.cancel-btn:active {
+  transform: scale(0.97);
 }
 
 .complete-btn {
-  background-color: #008CBA;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin: 5px;
+  background: rgba(167, 139, 250, 0.2);
+  color: #c4b5fd;
 }
-
-.remove-btn {
-  background-color: #f44336;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin: 5px;
-}
+.complete-btn:hover { background: rgba(167, 139, 250, 0.35); }
 
 .edit-btn {
-  background-color: #ffa500;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin: 5px;
+  background: rgba(245, 158, 11, 0.18);
+  color: #fcd34d;
 }
+.edit-btn:hover { background: rgba(245, 158, 11, 0.3); }
 
-/* Стилове за формата */
+.remove-btn {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+.remove-btn:hover { background: rgba(239, 68, 68, 0.28); }
+
+.save-btn {
+  background: rgba(52, 211, 153, 0.18);
+  color: #6ee7b7;
+}
+.save-btn:hover { background: rgba(52, 211, 153, 0.3); }
+
+.cancel-btn {
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.5);
+}
+.cancel-btn:hover { background: rgba(255, 255, 255, 0.13); }
+
+/* ── Add form ── */
 form {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 8px;
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
-form input, form select {
-  margin-bottom: 10px;
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #ddd;
+form input,
+form select {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #f0f0f5;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.2s;
+  margin: 0;
+}
+
+form input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+form input:focus,
+form select:focus {
+  border-color: #a78bfa;
 }
 
 form button {
-  background-color: #4CAF50;
-  color: white;
+  width: 100%;
+  background: linear-gradient(135deg, #7c3aed, #3b82f6);
   border: none;
-  padding: 10px;
-  border-radius: 5px;
+  border-radius: 10px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 11px;
   cursor: pointer;
+  letter-spacing: 0.2px;
+  transition: opacity 0.2s, transform 0.1s;
 }
 
-/* Добави този CSS код към App.css за стилизиране на съобщението за грешка */
+form button:hover { opacity: 0.9; }
+form button:active { transform: scale(0.98); }
+
+/* ── Error message ── */
 .error-message {
-  color: #f44336; /* Червен цвят за съобщенията за грешка */
-  background-color: #fbe9e7; /* Светло червен фон за контраст */
-  border: 1px solid #f44336; /* Червена рамка */
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 20px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
 }
-/* Стилове за footer */
+
+/* ── Footer ── */
 .footer {
   text-align: center;
-  padding: 10px;
-  background-color: linear-gradient(135deg, #71b7e6, #9b59b6);
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  font-size: 18px;
-  color: #040303; /* Светъл цвят на текста */
-  
+  padding: 14px 10px 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.22);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  margin-top: 12px;
 }
