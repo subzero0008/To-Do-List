@@ -1,21 +1,12 @@
 const mongoose = require('mongoose');
 
 const todoSchema = new mongoose.Schema({
-  text: String,
-  date: String,
-  priority: {
-    type: String,
-    enum: ['High', 'Medium', 'Low'],
-    default: 'Medium'
-  },
-  priorityOrder: {
-    type: Number,
-    enum: [1, 2, 3], // High: 1, Medium: 2, Low: 3
-    default: 2
-  },
-  isCompleted: Boolean,
-});
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  text: { type: String, required: true },
+  date: { type: String, required: true },
+  priority: { type: String, enum: ['High', 'Medium', 'Low'], default: 'Medium' },
+  priorityOrder: { type: Number, default: 2 },
+  isCompleted: { type: Boolean, default: false },
+}, { timestamps: true });
 
-const Todo = mongoose.model('Todo', todoSchema);
-
-module.exports = Todo;
+module.exports = mongoose.model('Todo', todoSchema);

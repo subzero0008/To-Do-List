@@ -1,116 +1,110 @@
 const mongoose = require('mongoose');
-const Todo = require('./models/Todo'); // Пътят е спрямо местоположението на todos.js
+const jwt = require('jsonwebtoken');
+const Todo = require('./models/Todo');
 
-exports.handler = async function(event, context) {
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Content-Type': 'application/json',
+};
+
+const connectDB = async () => {
+  if (mongoose.connection.readyState >= 1) return;
+  await mongoose.connect(process.env.MONGO_URI);
+};
+
+const verifyToken = (event) => {
+  const authHeader = event.headers.authorization || event.headers.Authorization;
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  const token = authHeader.split(' ')[1];
   try {
-    // Connect to MongoDB
-    if (mongoose.connection.readyState === 0) {
-      await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-    }
+    return jwt.verify(token, process.env.JWT_SECRET);
+  } catch {
+    return null;
+  }
+};
 
-    let response;
+exports.handler = async function (event, context) {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: corsHeaders, body: '' };
+  }
+
+  const user = verifyToken(event);
+  if (!user) {
+    return {
+      statusCode: 401,
+      headers: corsHeaders,
+      body: JSON.stringify({ error: 'Unauthorized' }),
+    };
+  }
+
+  try {
+    await connectDB();
+    const id = event.path.split('/').pop();
+
     switch (event.httpMethod) {
-      case 'GET':
-        // Handle GET request
-        response = await Todo.find({}).sort({ priorityOrder: 1 }); // Correct sorting field
-        return {
-          statusCode: 200,
-          body: JSON.stringify(response),
-        };
+      case 'GET': {
+        const todos = await Todo.find({ userId: user.userId }).sort({ priorityOrder: 1 });
+        return { statusCode: 200, headers: corsHeaders, body: JSON.stringify(todos) };
+      }
 
-      case 'POST':
-        // Handle POST request
-        const postData = event.body ? JSON.parse(event.body) : null;
-        if (!postData || !postData.text || !postData.date) {
-          return {
-            statusCode: 400,
-            body: JSON.stringify({ error: 'Invalid data' }),
-          };
+      case 'POST': {
+        const data = event.body ? JSON.parse(event.body) : null;
+        if (!data?.text || !data?.date) {
+          return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Text and date are required' }) };
         }
-        const newTodo = new Todo({
-          text: postData.text,
-          date: postData.date,
-          priority: postData.priority,
-          priorityOrder: { High: 1, Medium: 2, Low: 3 }[postData.priority],
+        const todo = await Todo.create({
+          userId: user.userId,
+          text: data.text,
+          date: data.date,
+          priority: data.priority || 'Medium',
+          priorityOrder: { High: 1, Medium: 2, Low: 3 }[data.priority] ?? 2,
+          isCompleted: false,
         });
-        await newTodo.save();
-        return {
-          statusCode: 201,
-          body: JSON.stringify(newTodo),
-        };
+        return { statusCode: 201, headers: corsHeaders, body: JSON.stringify(todo) };
+      }
 
-      case 'PUT':
-        const updateData = JSON.parse(event.body);
-        console.log('Received PUT request with data:', updateData);
-
-        // Проверка на наличието на основни полета
-        if (!updateData || !updateData.text || !updateData.date || typeof updateData.priorityOrder !== 'number') {
-          console.error('Invalid data received:', updateData);
-          return {
-            statusCode: 400,
-            body: JSON.stringify({ error: 'Invalid data' }),
-          };
+      case 'PUT': {
+        if (!id || id === 'todos') {
+          return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Missing ID' }) };
         }
-
-        // Извличане на ID от URL
-        const id = event.path.split('/').pop();
-
-        // Опит за обновяване на записа
-        try {
-          const updatedTodo = await Todo.findByIdAndUpdate(
-            id, // ID от URL
-            { $set: updateData }, // Полета за обновяване
-            { new: true, runValidators: true } // Добавяне на валидация
-          );
-
-          console.log('Updated Todo:', updatedTodo);
-
-          if (!updatedTodo) {
-            console.error('Todo not found:', id);
-            return {
-              statusCode: 404,
-              body: JSON.stringify({ error: 'Todo not found' }),
-            };
-          }
-
-          return {
-            statusCode: 200,
-            body: JSON.stringify(updatedTodo),
-          };
-        } catch (err) {
-          console.error('Error updating Todo:', err);
-          return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'Server Error' }),
-          };
+        const data = event.body ? JSON.parse(event.body) : null;
+        const updateFields = {};
+        if (data.text !== undefined) updateFields.text = data.text;
+        if (data.date !== undefined) updateFields.date = data.date;
+        if (data.priority !== undefined) {
+          updateFields.priority = data.priority;
+          updateFields.priorityOrder = { High: 1, Medium: 2, Low: 3 }[data.priority] ?? 2;
         }
+        if (data.isCompleted !== undefined) updateFields.isCompleted = data.isCompleted;
 
-      case 'DELETE':
-        // Handle DELETE request
-        const deleteId = event.path.split('/').pop();
-        if (!deleteId) {
-          return {
-            statusCode: 400,
-            body: JSON.stringify({ error: 'Invalid ID' }),
-          };
+        const updated = await Todo.findOneAndUpdate(
+          { _id: id, userId: user.userId },
+          { $set: updateFields },
+          { new: true }
+        );
+        if (!updated) {
+          return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Todo not found' }) };
         }
-        await Todo.findByIdAndDelete(deleteId);
-        return {
-          statusCode: 200,
-          body: JSON.stringify({ message: 'Deleted' }),
-        };
+        return { statusCode: 200, headers: corsHeaders, body: JSON.stringify(updated) };
+      }
+
+      case 'DELETE': {
+        if (!id || id === 'todos') {
+          return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Missing ID' }) };
+        }
+        await Todo.findOneAndDelete({ _id: id, userId: user.userId });
+        return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ message: 'Deleted' }) };
+      }
 
       default:
-        return {
-          statusCode: 405,
-          body: JSON.stringify({ error: 'Method Not Allowed' }),
-        };
+        return { statusCode: 405, headers: corsHeaders, body: JSON.stringify({ error: 'Method Not Allowed' }) };
     }
   } catch (err) {
-    console.error('Database connection error:', err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Server Error' }),
-    };
+    console.error('Todos error:', err);
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Server error', details: err.message }) };
   }
 };
