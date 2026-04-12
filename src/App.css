@@ -722,3 +722,98 @@ input:focus-visible {
 body {
   align-items: flex-start;
 }
+/* ── Success message ── */
+.success-message {
+  background: rgba(52, 211, 153, 0.18);
+  backdrop-filter: blur(12px);
+  border-left: 4px solid #34d399;
+  border-radius: 20px;
+  color: #a7f3d0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  animation: shakeError 0.35s ease;
+}
+
+/* ── Auth extras ── */
+.auth-subtitle {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.auth-back {
+  font-size: 0.8rem;
+  color: #a78bfa;
+  cursor: pointer;
+  margin-bottom: 20px;
+  display: inline-block;
+  transition: opacity 0.2s;
+}
+.auth-back:hover { opacity: 0.7; }
+
+.auth-forgot {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 0.78rem;
+  color: rgba(200, 190, 255, 0.5);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.auth-forgot:hover { color: #a78bfa; }
+
+/* ── Password match indicator ── */
+.password-match-wrap {
+  position: relative;
+}
+
+.input-valid {
+  border-color: rgba(52, 211, 153, 0.6) !important;
+}
+
+.input-invalid {
+  border-color: rgba(239, 68, 68, 0.6) !important;
+}
+
+.match-indicator {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 500;
+  margin-top: -6px;
+  margin-bottom: 4px;
+  padding-left: 14px;
+}
+.match-indicator.match { color: #6ee7b7; }
+.match-indicator.no-match { color: #fca5a5; }
+/* ── Date picker ── */
+.date-picker-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.date-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: rgba(200, 190, 255, 0.5);
+  padding-left: 14px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.date-input {
+  color-scheme: dark;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7) sepia(1) saturate(3) hue-rotate(220deg);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}

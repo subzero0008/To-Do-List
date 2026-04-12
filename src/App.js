@@ -16,10 +16,6 @@ function App() {
 
   const apiUrl = '/.netlify/functions/todos';
 
-  const authHeaders = () => ({
-    headers: { Authorization: `Bearer ${token}` }
-  });
-
   const handleLogin = (newToken, newUsername) => {
     setToken(newToken);
     setUsername(newUsername);
@@ -36,25 +32,26 @@ function App() {
   const fetchTodos = useCallback(async () => {
     if (!token) return;
     try {
-      const response = await axios.get(apiUrl, authHeaders());
+      const response = await axios.get(apiUrl, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { sortBy: sortBy || 'priority', filterBy, dateOrder: dateOrder || 'asc' }
+      });
+
       if (Array.isArray(response.data)) {
-        let filtered = response.data;
-        if (filterBy === 'completed') filtered = filtered.filter(t => t.isCompleted);
-        if (filterBy === 'incomplete') filtered = filtered.filter(t => !t.isCompleted);
-        const sorted = filtered.sort((a, b) => {
+        let filteredTodos = response.data.filter(todo => todo);
+        if (filterBy === 'completed') filteredTodos = filteredTodos.filter(t => t.isCompleted);
+        else if (filterBy === 'incomplete') filteredTodos = filteredTodos.filter(t => !t.isCompleted);
+
+        const sortedTodos = filteredTodos.sort((a, b) => {
           if (sortBy === 'priority') return a.priorityOrder - b.priorityOrder;
-          if (sortBy === 'date') {
-            return dateOrder === 'asc'
-              ? new Date(a.date) - new Date(b.date)
-              : new Date(b.date) - new Date(a.date);
-          }
+          if (sortBy === 'date') return dateOrder === 'asc' ? new Date(a.date) - new Date(b.date) : new Date(b.date) - new Date(a.date);
           return 0;
         });
-        setTodos(sorted);
+        setTodos(sortedTodos);
       }
-    } catch (err) {
-      if (err.response?.status === 401) handleLogout();
-      console.error('Error fetching todos:', err);
+    } catch (error) {
+      if (error.response?.status === 401) handleLogout();
+      console.error('Error fetching todos:', error);
     }
   }, [token, sortBy, dateOrder, filterBy]);
 
@@ -67,15 +64,17 @@ function App() {
     if (text.length < 5 || text.length > 50) { setErrorMessage('Task text must be between 5 and 50 characters.'); return; }
     setErrorMessage('');
     try {
-      const response = await axios.post(apiUrl, { text, date, priority }, authHeaders());
-      const newTodos = [...todos, response.data].sort((a, b) => {
+      const response = await axios.post(apiUrl, { text, date, priority }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const newTodos = [...todos, response.data].filter(t => t).sort((a, b) => {
         if (sortBy === 'priority') return a.priorityOrder - b.priorityOrder;
         if (sortBy === 'date') return dateOrder === 'asc' ? new Date(a.date) - new Date(b.date) : new Date(b.date) - new Date(a.date);
         return 0;
       });
       setTodos(newTodos);
-    } catch (err) {
-      console.error('Error adding todo:', err);
+    } catch (error) {
+      console.error('Error adding todo:', error);
       setErrorMessage('Failed to add todo.');
     }
   };
@@ -84,39 +83,51 @@ function App() {
     const todo = todos.find(t => t._id === id);
     if (!todo) return;
     try {
-      const updated = await axios.put(`${apiUrl}/${id}`, { isCompleted: !todo.isCompleted }, authHeaders());
+      const updated = await axios.put(`${apiUrl}/${id}`, { isCompleted: !todo.isCompleted }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setTodos(todos.map(t => t._id === id ? updated.data : t));
-    } catch (err) {
-      console.error('Error completing todo:', err);
+    } catch (error) {
+      console.error('Error completing todo:', error);
+      setErrorMessage('Failed to complete the todo');
     }
   };
 
   const removeTodo = async (id) => {
     if (!window.confirm('Are you sure you want to delete this todo?')) return;
     try {
-      await axios.delete(`${apiUrl}/${id}`, authHeaders());
+      await axios.delete(`${apiUrl}/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setTodos(todos.filter(t => t._id !== id));
-    } catch (err) {
-      console.error('Error removing todo:', err);
+    } catch (error) {
+      console.error('Error removing todo:', error);
+      setErrorMessage('Failed to remove the todo');
     }
   };
 
   const editTodo = async (id, newText, newDate, newPriority) => {
+    const todo = todos.find(t => t._id === id);
+    if (!todo) return;
     try {
       const updated = await axios.put(`${apiUrl}/${id}`, {
         text: newText,
         date: newDate,
         priority: newPriority,
         priorityOrder: { High: 1, Medium: 2, Low: 3 }[newPriority],
-      }, authHeaders());
-      const updatedTodos = todos.map(t => t._id === id ? updated.data : t).sort((a, b) => {
+        isCompleted: todo.isCompleted
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const updatedTodos = todos.map(t => t._id === id ? updated.data : t).filter(t => t).sort((a, b) => {
         if (sortBy === 'priority') return a.priorityOrder - b.priorityOrder;
         if (sortBy === 'date') return dateOrder === 'asc' ? new Date(a.date) - new Date(b.date) : new Date(b.date) - new Date(a.date);
         return 0;
       });
       setTodos(updatedTodos);
-    } catch (err) {
-      console.error('Error editing todo:', err);
+    } catch (error) {
+      console.error('Error editing todo:', error);
+      setErrorMessage('Failed to edit the todo');
     }
   };
 
