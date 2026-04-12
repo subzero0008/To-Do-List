@@ -1,6 +1,8 @@
 [build]
-  functions = "netlify/functions"
+  base = "."
   command = "npm run build"
+  publish = "build"
+  functions = "netlify/functions"
 
 [build.environment]
   CI = "false"
@@ -8,4 +10,9 @@
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
   status = 200
