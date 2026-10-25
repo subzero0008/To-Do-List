@@ -1023,7 +1023,7 @@ body {
    10) ФИКСИРАН COPYRIGHT долу в дясно (глобално, за всички устройства)
    ═══════════════════════════════════════════════════════════ */
 html::after {
-  content: '© 2024 Yulian Yuriev';
+  content: '© 2026 Yulian Yuriev';
   position: fixed;
   bottom: max(10px, env(safe-area-inset-bottom));
   right: max(12px, env(safe-area-inset-right));
