@@ -817,3 +817,188 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 input[type="date"]::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE FIXES — за мобилни устройства
+   (добави в края на App.css, за да override-не горните правила)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── 1) Глобални корекции ── */
+html {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;              /* по-точно на мобилни (address bar) */
+  overflow-x: hidden;
+  padding-top:    max(32px, env(safe-area-inset-top));
+  padding-right:  max(20px, env(safe-area-inset-right));
+  padding-bottom: max(48px, env(safe-area-inset-bottom));
+  padding-left:   max(20px, env(safe-area-inset-left));
+}
+
+/* ── 2) iOS Safari: предотврати auto-zoom при фокус на input ── */
+@media (max-width: 768px) {
+  form input,
+  form select,
+  .edit-input {
+    font-size: 16px;   /* минимум 16px = без zoom на iOS */
+  }
+}
+
+/* ── 3) По-удобни tap-targets на touch устройства ── */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  select,
+  .auth-tab {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .complete-btn,
+  .edit-btn,
+  .remove-btn,
+  .save-btn,
+  .cancel-btn {
+    min-height: 44px;
+    padding: 10px 16px;
+  }
+  .logout-btn {
+    min-height: 40px;
+    padding: 10px 16px;
+  }
+  form button {
+    min-height: 48px;
+  }
+  .auth-tab {
+    min-height: 44px;
+  }
+}
+
+/* ── 4) Мобилен layout (≤ 550px) ── */
+@media (max-width: 550px) {
+  body {
+    padding: 16px 12px 24px;
+    padding-top:    max(16px, env(safe-area-inset-top));
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    padding-left:   max(12px, env(safe-area-inset-left));
+    padding-right:  max(12px, env(safe-area-inset-right));
+  }
+
+  .app {
+    padding: 18px 14px 16px;
+    border-radius: 1.5rem;
+  }
+  .app::before {
+    border-radius: 1.5rem;
+  }
+
+  /* Header: h1 и user-info на отделни редове */
+  .app-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .app-header h1 {
+    text-align: center;
+    font-size: 1.35rem;
+  }
+  .user-info {
+    justify-content: center;
+  }
+
+  /* Filters: вертикален layout вместо разтегнати pills */
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    border-radius: 20px;
+    padding: 12px;
+    gap: 10px;
+  }
+  .filters label {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .filters select {
+    flex: 1;
+    margin-left: 8px;
+  }
+
+  /* Todo карта: content на цял ред, бутони в отделен ред */
+  .todo {
+    flex-wrap: wrap;
+    padding: 14px;
+    gap: 10px;
+  }
+  .todo-content {
+    width: 100%;
+    flex-basis: 100%;
+  }
+  .todo-text {
+    font-size: 0.95rem;
+    white-space: normal;   /* позволи пренасяне на дълъг текст */
+    overflow: visible;
+  }
+
+  /* Бутони: равномерно разпределени, без margin */
+  .todo > button {
+    flex: 1 1 0;
+    min-width: 0;
+    margin: 0;
+    padding: 10px 6px;
+    font-size: 0.72rem;
+    justify-content: center;
+    min-height: 40px;
+  }
+
+  /* TodoForm */
+  form {
+    padding: 16px 14px;
+    border-radius: 22px;
+    margin-top: 12px;
+    gap: 10px;
+  }
+  form button {
+    font-size: 0.82rem;
+    padding: 14px;
+  }
+
+  /* По-малко разстояние между todo елементите */
+  .todo-list {
+    margin: 14px 0 10px;
+    gap: 10px;
+  }
+}
+
+/* ── 5) Много тесни екрани (≤ 380px, iPhone SE) ── */
+@media (max-width: 380px) {
+  .app-header h1 { font-size: 1.2rem; }
+  .todo > button { font-size: 0.68rem; padding: 9px 4px; }
+  .filters label { font-size: 0.7rem; }
+}
+
+/* ── 6) Auth карта на мобилни ── */
+@media (max-width: 480px) {
+  .auth-wrapper {
+    /* Разтяга се да запълни body вместо 100vh + body padding overflow */
+    align-self: stretch;
+    min-height: 0;
+    padding: 16px 12px;
+    padding-top:    max(16px, env(safe-area-inset-top));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+  .auth-card {
+    padding: 24px 18px;
+    border-radius: 1.5rem;
+  }
+  .auth-card::before {
+    border-radius: 1.5rem;
+  }
+  .auth-tab {
+    padding: 10px 12px;
+    font-size: 0.75rem;
+  }
+}
